@@ -1,0 +1,325 @@
+{
+  "source": "processed_data\\faf4_faf5_fixed.csv",
+  "output_root": "output\\faf4_faf5_fixed_year_splits",
+  "format": "train/context detail rows; val/test route-level tons targets; val_commodity/test_commodity route-commodity tons targets",
+  "purpose": "3-year-ahead forecasting with one post-train context year",
+  "splits": {
+    "split_1": {
+      "train": [
+        2012,
+        2013,
+        2014,
+        2015,
+        2016,
+        2017,
+        2018
+      ],
+      "context": [
+        2019
+      ],
+      "val": [
+        2021
+      ],
+      "test": [
+        2022
+      ]
+    },
+    "split_2": {
+      "train": [
+        2012,
+        2013,
+        2014,
+        2015,
+        2016,
+        2017,
+        2018,
+        2019
+      ],
+      "context": [
+        2020
+      ],
+      "val": [
+        2022
+      ],
+      "test": [
+        2023
+      ]
+    },
+    "split_3": {
+      "train": [
+        2012,
+        2013,
+        2014,
+        2015,
+        2016,
+        2017,
+        2018,
+        2019,
+        2020
+      ],
+      "context": [
+        2021
+      ],
+      "val": [
+        2023
+      ],
+      "test": [
+        2024
+      ]
+    }
+  },
+  "available_years": [
+    2012,
+    2013,
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024
+  ],
+  "outputs": [
+    {
+      "split": "split_1",
+      "part": "train",
+      "level": "detail",
+      "years": "2012,2013,2014,2015,2016,2017,2018",
+      "min_year": 2012,
+      "max_year": 2018,
+      "rows": 1007082,
+      "cols": 8,
+      "output": "output\\faf4_faf5_fixed_year_splits\\split_1\\train.csv"
+    },
+    {
+      "split": "split_1",
+      "part": "context",
+      "level": "detail",
+      "years": "2019",
+      "min_year": 2019,
+      "max_year": 2019,
+      "rows": 71852,
+      "cols": 8,
+      "output": "output\\faf4_faf5_fixed_year_splits\\split_1\\context.csv"
+    },
+    {
+      "split": "split_1",
+      "part": "val",
+      "level": "route_aggregate",
+      "years": "2021",
+      "min_year": 2021,
+      "max_year": 2021,
+      "rows": 2493,
+      "cols": 4,
+      "output": "output\\faf4_faf5_fixed_year_splits\\split_1\\val.csv"
+    },
+    {
+      "split": "split_1",
+      "part": "val_commodity",
+      "level": "route_commodity_aggregate",
+      "years": "2021",
+      "min_year": 2021,
+      "max_year": 2021,
+      "rows": 71852,
+      "cols": 5,
+      "output": "output\\faf4_faf5_fixed_year_splits\\split_1\\val_commodity.csv"
+    },
+    {
+      "split": "split_1",
+      "part": "test",
+      "level": "route_aggregate",
+      "years": "2022",
+      "min_year": 2022,
+      "max_year": 2022,
+      "rows": 2493,
+      "cols": 4,
+      "output": "output\\faf4_faf5_fixed_year_splits\\split_1\\test.csv"
+    },
+    {
+      "split": "split_1",
+      "part": "test_commodity",
+      "level": "route_commodity_aggregate",
+      "years": "2022",
+      "min_year": 2022,
+      "max_year": 2022,
+      "rows": 71852,
+      "cols": 5,
+      "output": "output\\faf4_faf5_fixed_year_splits\\split_1\\test_commodity.csv"
+    },
+    {
+      "split": "split_2",
+      "part": "train",
+      "level": "detail",
+      "years": "2012,2013,2014,2015,2016,2017,2018,2019",
+      "min_year": 2012,
+      "max_year": 2019,
+      "rows": 1078934,
+      "cols": 8,
+      "output": "output\\faf4_faf5_fixed_year_splits\\split_2\\train.csv"
+    },
+    {
+      "split": "split_2",
+      "part": "context",
+      "level": "detail",
+      "years": "2020",
+      "min_year": 2020,
+      "max_year": 2020,
+      "rows": 71852,
+      "cols": 8,
+      "output": "output\\faf4_faf5_fixed_year_splits\\split_2\\context.csv"
+    },
+    {
+      "split": "split_2",
+      "part": "val",
+      "level": "route_aggregate",
+      "years": "2022",
+      "min_year": 2022,
+      "max_year": 2022,
+      "rows": 2493,
+      "cols": 4,
+      "output": "output\\faf4_faf5_fixed_year_splits\\split_2\\val.csv"
+    },
+    {
+      "split": "split_2",
+      "part": "val_commodity",
+      "level": "route_commodity_aggregate",
+      "years": "2022",
+      "min_year": 2022,
+      "max_year": 2022,
+      "rows": 71852,
+      "cols": 5,
+      "output": "output\\faf4_faf5_fixed_year_splits\\split_2\\val_commodity.csv"
+    },
+    {
+      "split": "split_2",
+      "part": "test",
+      "level": "route_aggregate",
+      "years": "2023",
+      "min_year": 2023,
+      "max_year": 2023,
+      "rows": 2493,
+      "cols": 4,
+      "output": "output\\faf4_faf5_fixed_year_splits\\split_2\\test.csv"
+    },
+    {
+      "split": "split_2",
+      "part": "test_commodity",
+      "level": "route_commodity_aggregate",
+      "years": "2023",
+      "min_year": 2023,
+      "max_year": 2023,
+      "rows": 71852,
+      "cols": 5,
+      "output": "output\\faf4_faf5_fixed_year_splits\\split_2\\test_commodity.csv"
+    },
+    {
+      "split": "split_3",
+      "part": "train",
+      "level": "detail",
+      "years": "2012,2013,2014,2015,2016,2017,2018,2019,2020",
+      "min_year": 2012,
+      "max_year": 2020,
+      "rows": 1150786,
+      "cols": 8,
+      "output": "output\\faf4_faf5_fixed_year_splits\\split_3\\train.csv"
+    },
+    {
+      "split": "split_3",
+      "part": "context",
+      "level": "detail",
+      "years": "2021",
+      "min_year": 2021,
+      "max_year": 2021,
+      "rows": 71852,
+      "cols": 8,
+      "output": "output\\faf4_faf5_fixed_year_splits\\split_3\\context.csv"
+    },
+    {
+      "split": "split_3",
+      "part": "val",
+      "level": "route_aggregate",
+      "years": "2023",
+      "min_year": 2023,
+      "max_year": 2023,
+      "rows": 2493,
+      "cols": 4,
+      "output": "output\\faf4_faf5_fixed_year_splits\\split_3\\val.csv"
+    },
+    {
+      "split": "split_3",
+      "part": "val_commodity",
+      "level": "route_commodity_aggregate",
+      "years": "2023",
+      "min_year": 2023,
+      "max_year": 2023,
+      "rows": 71852,
+      "cols": 5,
+      "output": "output\\faf4_faf5_fixed_year_splits\\split_3\\val_commodity.csv"
+    },
+    {
+      "split": "split_3",
+      "part": "test",
+      "level": "route_aggregate",
+      "years": "2024",
+      "min_year": 2024,
+      "max_year": 2024,
+      "rows": 2493,
+      "cols": 4,
+      "output": "output\\faf4_faf5_fixed_year_splits\\split_3\\test.csv"
+    },
+    {
+      "split": "split_3",
+      "part": "test_commodity",
+      "level": "route_commodity_aggregate",
+      "years": "2024",
+      "min_year": 2024,
+      "max_year": 2024,
+      "rows": 71852,
+      "cols": 5,
+      "output": "output\\faf4_faf5_fixed_year_splits\\split_3\\test_commodity.csv"
+    }
+  ],
+  "aggregation": {
+    "parts": [
+      "val",
+      "test"
+    ],
+    "group_by": [
+      "origin",
+      "destination",
+      "year"
+    ],
+    "sum_columns": [
+      "tons"
+    ],
+    "dropped_from_targets": [
+      "value",
+      "tmiles"
+    ]
+  },
+  "commodity_target_aggregation": {
+    "parts": [
+      "val_commodity",
+      "test_commodity"
+    ],
+    "group_by": [
+      "origin",
+      "destination",
+      "commodity",
+      "year"
+    ],
+    "sum_columns": [
+      "tons"
+    ],
+    "dropped_from_targets": [
+      "distance_band",
+      "value",
+      "tmiles"
+    ],
+    "note": "Auxiliary targets for commodity-level modeling. Official route-level val/test targets are unchanged."
+  }
+}
