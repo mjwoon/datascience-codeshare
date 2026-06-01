@@ -1,0 +1,28 @@
+{
+  "run_defaults": {
+    "experimenter": "Jiwon",
+    "dataset_version": "faf4_faf5_fixed_year_splits_v3.1_with_external_and_timeseries",
+    "description": "3-year-ahead route-level tons forecast, 52 features (8 base + 5 train-trend + 39 external), LightGBM Tweedie p=1.5, wRMSE primary",
+    "random_seed": 42,
+    "log_transform_target": false,
+    "granularity": "commodity"
+  },
+  "mlflow": {
+    "tracking_uri": "https://mlflow.hyu.life",
+    "experiment_name": "Truck_Route_Volume_Prediction",
+    "splits": {
+      "split_1": { "context": "2019", "val": "2019", "test": "2022", "weight": 0.2 },
+      "split_2": { "context": "2020", "val": "2020", "test": "2023", "weight": 0.3 },
+      "split_3": { "context": "2021", "val": "2021", "test": "2024", "weight": 0.5 }
+    }
+  },
+  "models": {
+    "LightGBM_Tweedie": {
+      "n_estimators": 300,
+      "learning_rate": 0.05,
+      "num_leaves": 63,
+      "objective": "tweedie",
+      "tweedie_variance_power": 1.5
+    }
+  }
+}
