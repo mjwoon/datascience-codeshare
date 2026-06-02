@@ -63,7 +63,7 @@ def candidate_route_wrmse(cand_series, gt_route):
     return wrmse(gt_route.values, route_pred.values)
 
 
-def analyze_split(split_name, ext_dir):
+def analyze_split(split_name, ext_dir, historical_scores=None):
     cfg = SPLITS[split_name]
     context_year = cfg["context"]
     val_year     = cfg["val"]
@@ -154,16 +154,34 @@ def analyze_split(split_name, ext_dir):
         all_val, 
         val_comm, 
         baseline_name="M0_median_3", 
-        margins=0.0, 
-        stability_penalties=None
+        margins=margins_dict, 
+        stability_penalties=stability_penalties,
+        historical_scores=historical_scores
     )
-    sel_counts = Counter(selection.values())
+    sel_counts = Counter()
+    for comm, weights in selection.items():
+        for name, weight in weights.items():
+            sel_counts[name] += weight
 
     val_pred_aligned  = apply_selection(all_val,  selection).pipe(route_aggregate).reindex(val_gt.index).fillna(0.0)
     test_pred_aligned = apply_selection(all_test, selection).pipe(route_aggregate).reindex(test_gt.index).fillna(0.0)
 
     integrated_val  = wrmse(val_gt.values,  val_pred_aligned.values)
     integrated_test = wrmse(test_gt.values, test_pred_aligned.values)
+
+    # Compute raw SSE for historical rolling
+    raw_sse = {}
+    val_aligned = val_comm.set_index(KEY_COMM)["tons"] if "tons" in val_comm.columns else val_comm.set_index(KEY_COMM).iloc[:, 0]
+    val_aligned = val_aligned.clip(lower=0)
+    for comm in val_aligned.index.get_level_values("commodity").unique():
+        comm_mask = val_aligned.index.get_level_values("commodity") == comm
+        y_true = val_aligned[comm_mask]
+        if len(y_true) == 0:
+            continue
+        raw_sse[comm] = {}
+        for cand_name, cand_series in all_val.items():
+            cp = cand_series.reindex(y_true.index).fillna(0.0)
+            raw_sse[comm][cand_name] = float(((y_true.values - cp.values) ** 2).sum())
 
     return {
         "split": split_name,
@@ -175,6 +193,7 @@ def analyze_split(split_name, ext_dir):
         "selection": sel_counts,
         "integrated_val":  integrated_val,
         "integrated_test": integrated_test,
+        "raw_sse": raw_sse,
     }
 
 
@@ -214,21 +233,37 @@ def print_split_report(r):
     # Selection summary
     sel = r["selection"]
     total = sum(sel.values())
-    print(f"\n  Phase 3 selection  (total {total} commodities):")
+    print(f"\n  Phase 3 selection  (total {total:.1f} commodities):")
     for name, cnt in sel.most_common(10):
-        bar = "█" * cnt
-        print(f"    {name:<30} {cnt:>3}  {bar}")
+        bar = "█" * int(round(cnt))
+        print(f"    {name:<30} {cnt:>5.1f}  {bar}")
 
 
 def main():
     ext_dir = EXTERNAL_DIR
     split_results = []
+    historical_scores = None
 
     for split_name in ["split_1", "split_2", "split_3"]:
         print(f"\n[Running {split_name}...]", flush=True)
-        r = analyze_split(split_name, ext_dir)
+        r = analyze_split(split_name, ext_dir, historical_scores=historical_scores)
         split_results.append(r)
         print_split_report(r)
+
+        # Update historical scores with exponential moving average
+        current_sse = r["raw_sse"]
+        if historical_scores is None:
+            historical_scores = current_sse
+        else:
+            for comm, cand_dict in current_sse.items():
+                if comm not in historical_scores:
+                    historical_scores[comm] = cand_dict.copy()
+                else:
+                    for cand_name, val_sse in cand_dict.items():
+                        if cand_name in historical_scores[comm]:
+                            historical_scores[comm][cand_name] = 0.5 * historical_scores[comm][cand_name] + 0.5 * val_sse
+                        else:
+                            historical_scores[comm][cand_name] = val_sse
 
     # Weighted summary
     weights = [r["weight"] for r in split_results]

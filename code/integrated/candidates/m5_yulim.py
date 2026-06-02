@@ -30,7 +30,7 @@ import pandas as pd
 import lightgbm as lgb
 
 from config import (
-    CORRECTION_CLIP, MIN_TARGET_YEAR, RANDOM_SEED, KEY_COMM, get_commodity_group
+    CORRECTION_CLIP, MIN_TARGET_YEAR, RANDOM_SEED, KEY_COMM, get_commodity_group, SHRINKAGE_FACTOR
 )
 from data_loader import medmean_predict
 from candidates.m2_bayasgalan import _build_feature_matrix, _get_feature_cols
@@ -259,7 +259,7 @@ class M5Model:
                 fc = [c for c in self._feature_cols_bc if c in X_grp.columns]
                 if fc:
                     correction_bc[mask] = np.clip(
-                        self._models_bc[grp].predict(X_grp[fc].fillna(0.0)),
+                        self._models_bc[grp].predict(X_grp[fc].fillna(0.0)) * SHRINKAGE_FACTOR,
                         -CORRECTION_CLIP, CORRECTION_CLIP,
                     )
 
@@ -267,7 +267,7 @@ class M5Model:
                 fc = [c for c in self._feature_cols_full if c in X_grp.columns]
                 if fc:
                     correction_full[mask] = np.clip(
-                        self._models_full[grp].predict(X_grp[fc].fillna(0.0)),
+                        self._models_full[grp].predict(X_grp[fc].fillna(0.0)) * SHRINKAGE_FACTOR,
                         -CORRECTION_CLIP, CORRECTION_CLIP,
                     )
                 else:

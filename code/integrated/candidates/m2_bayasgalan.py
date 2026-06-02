@@ -25,7 +25,7 @@ import numpy as np
 import pandas as pd
 import lightgbm as lgb
 
-from config import CORRECTION_CLIP, MIN_TARGET_YEAR, COVID_SKIP_YEARS, RANDOM_SEED, KEY_COMM
+from config import CORRECTION_CLIP, MIN_TARGET_YEAR, COVID_SKIP_YEARS, RANDOM_SEED, KEY_COMM, SHRINKAGE_FACTOR
 from data_loader import cm3_predict
 
 KEY_ROUTE = ["origin", "destination"]
@@ -246,7 +246,7 @@ class M2Model:
             return results
 
         X_pred = X[available_cols].fillna(0.0)
-        correction = self._model.predict(X_pred)
+        correction = self._model.predict(X_pred) * SHRINKAGE_FACTOR
         correction = np.clip(correction, -CORRECTION_CLIP, CORRECTION_CLIP)
 
         cm3_vals = cm3.values

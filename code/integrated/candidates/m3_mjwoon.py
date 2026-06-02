@@ -25,7 +25,7 @@ import numpy as np
 import pandas as pd
 import lightgbm as lgb
 
-from config import CORRECTION_CLIP, MIN_TARGET_YEAR, COVID_SKIP_YEARS, RANDOM_SEED, KEY_COMM
+from config import CORRECTION_CLIP, MIN_TARGET_YEAR, COVID_SKIP_YEARS, RANDOM_SEED, KEY_COMM, SHRINKAGE_FACTOR
 from data_loader import cm3_predict
 from candidates.m2_bayasgalan import (
     _build_feature_matrix, _get_feature_cols, _make_training_samples
@@ -200,7 +200,7 @@ class M3Model:
         # M3_lgbm
         if self._lgbm_model is not None and available_cols:
             corr = np.clip(
-                self._lgbm_model.predict(X_pred),
+                self._lgbm_model.predict(X_pred) * SHRINKAGE_FACTOR,
                 -CORRECTION_CLIP, CORRECTION_CLIP
             )
             lgbm_final = np.expm1(np.log1p(cm3_vals) + corr).clip(0)
@@ -213,7 +213,7 @@ class M3Model:
                 and available_cols):
             p_pos = self._clf_model.predict_proba(X_pred)[:, 1]
             corr2 = np.clip(
-                self._reg_model.predict(X_pred),
+                self._reg_model.predict(X_pred) * SHRINKAGE_FACTOR,
                 -CORRECTION_CLIP, CORRECTION_CLIP
             )
             hurdle_final = p_pos * np.expm1(np.log1p(cm3_vals) + corr2).clip(0)

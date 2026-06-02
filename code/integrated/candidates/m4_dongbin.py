@@ -27,7 +27,7 @@ import lightgbm as lgb
 
 from config import (
     CORRECTION_CLIP, MIN_TARGET_YEAR, COVID_SKIP_YEARS, RANDOM_SEED,
-    KEY_COMM, COMM_GROUPS, get_commodity_group
+    KEY_COMM, COMM_GROUPS, get_commodity_group, SHRINKAGE_FACTOR
 )
 from data_loader import cm3_predict
 from candidates.m2_bayasgalan import (
@@ -234,7 +234,7 @@ class M4Model:
                 continue
             X_grp = X.iloc[mask][available_cols].fillna(0.0) if available_cols else X.iloc[mask].fillna(0.0)
             correction[mask] = np.clip(
-                model.predict(X_grp),
+                model.predict(X_grp) * SHRINKAGE_FACTOR,
                 -CORRECTION_CLIP, CORRECTION_CLIP
             )
 

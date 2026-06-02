@@ -18,7 +18,8 @@ RANDOM_SEED = 42
 MIN_TARGET_YEAR = 2017   # applies to target year (not base year)
 COVID_SKIP_YEARS = {2020}
 CORRECTION_CLIP = 0.10
-SELECTION_MARGIN = 0.15
+SELECTION_MARGIN = 0.12
+SHRINKAGE_FACTOR = 0.90
 
 KEY_COMM = ["origin", "destination", "commodity"]
 KEY_ROUTE = ["origin", "destination"]

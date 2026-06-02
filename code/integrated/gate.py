@@ -87,6 +87,43 @@ def apply_adaptive_soft_gate(
     alpha_min: float = 0.80
 ) -> dict[str, pd.Series]:
     """
-    Disabled to maximize validation performance (returns candidates as-is).
+    Applies adaptive soft gate blending to ML candidates to control overfitting.
+    Stable routes (low repeated error score) pull predictions closer to baseline.
     """
-    return candidates
+    ml_to_base = {
+        "M2_cm3_lgbm": "M2_cm3only",
+        "M3_hurdle": "M2_cm3only",
+        "M3_lgbm": "M2_cm3only",
+        "M4_lgbm": "M2_cm3only",
+        "M4_resid_a003": "M2_cm3only",
+        "M4_resid_a005": "M2_cm3only",
+        "M4_resid_a008": "M2_cm3only",
+        "M4_resid_a010": "M2_cm3only",
+        "M5_medmean_lgbm": "M5_medmean_base",
+        "M5_medmean_lgbm_extfeat": "M5_medmean_base",
+    }
+    
+    out_candidates = {}
+    for name, series in candidates.items():
+        if name in ml_to_base:
+            base_name = ml_to_base[name]
+            if base_name in candidates:
+                base_series = candidates[base_name]
+                
+                # Align repeated error score to candidate series index
+                aligned_index = series.index.droplevel('commodity')
+                gate_score = repeated_error_score_norm.reindex(aligned_index).fillna(0.0)
+                gate_score.index = series.index
+                
+                # Calculate effective alpha: alpha_min when score=0, alpha_max when score=1
+                effective_alpha = alpha_min + (alpha_max - alpha_min) * gate_score
+                
+                # Blend: (1 - eff_alpha) * base + eff_alpha * ML
+                blended = (1.0 - effective_alpha) * base_series + effective_alpha * series
+                out_candidates[name] = blended
+            else:
+                out_candidates[name] = series
+        else:
+            out_candidates[name] = series
+            
+    return out_candidates

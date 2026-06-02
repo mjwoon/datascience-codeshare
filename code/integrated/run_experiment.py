@@ -75,6 +75,7 @@ def run_split(
     split_name: str,
     ext_dir: Path,
     use_mlflow: bool,
+    historical_scores: dict | None = None,
 ) -> dict:
     cfg = SPLITS[split_name]
     context_year = cfg["context"]
@@ -194,8 +195,9 @@ def run_split(
         all_val, 
         val_comm, 
         baseline_name="M0_median_3", 
-        margins=0.0, 
-        stability_penalties=None
+        margins=margins_dict, 
+        stability_penalties=stability_penalties,
+        historical_scores=historical_scores
     )
 
     val_comm_pred  = apply_selection(all_val,  selection)
@@ -229,9 +231,26 @@ def run_split(
     print(f"  eco_benefit  val={eco_val:+.3f} M$  test={eco_test:+.3f} M$")
 
     from collections import Counter
-    sel_counts = Counter(selection.values())
+    sel_counts = Counter()
+    for comm, weights in selection.items():
+        for name, weight in weights.items():
+            sel_counts[name] += weight
     top5 = sel_counts.most_common(5)
     print(f"  Top selected models: {top5}")
+
+    # Compute raw SSE for historical rolling
+    raw_sse = {}
+    val_aligned = val_comm.set_index(KEY_COMM)["tons"] if "tons" in val_comm.columns else val_comm.set_index(KEY_COMM).iloc[:, 0]
+    val_aligned = val_aligned.clip(lower=0)
+    for comm in val_aligned.index.get_level_values("commodity").unique():
+        comm_mask = val_aligned.index.get_level_values("commodity") == comm
+        y_true = val_aligned[comm_mask]
+        if len(y_true) == 0:
+            continue
+        raw_sse[comm] = {}
+        for cand_name, cand_series in all_val.items():
+            cp = cand_series.reindex(y_true.index).fillna(0.0)
+            raw_sse[comm][cand_name] = float(((y_true.values - cp.values) ** 2).sum())
 
     return {
         "split": split_name,
@@ -251,6 +270,7 @@ def run_split(
         "selection": selection,
         "val_pred": val_pred_aligned,
         "test_pred": test_pred_aligned,
+        "raw_sse": raw_sse,
     }
 
 
@@ -271,12 +291,28 @@ def main() -> None:
             use_mlflow = False
 
     split_results = []
+    historical_scores = None
     for split_name in args.splits:
         if split_name not in SPLITS:
             print(f"Unknown split: {split_name}, skipping.")
             continue
-        result = run_split(split_name, ext_dir, use_mlflow)
+        result = run_split(split_name, ext_dir, use_mlflow, historical_scores=historical_scores)
         split_results.append(result)
+
+        # Update historical scores with exponential moving average
+        current_sse = result["raw_sse"]
+        if historical_scores is None:
+            historical_scores = current_sse
+        else:
+            for comm, cand_dict in current_sse.items():
+                if comm not in historical_scores:
+                    historical_scores[comm] = cand_dict.copy()
+                else:
+                    for cand_name, val_sse in cand_dict.items():
+                        if cand_name in historical_scores[comm]:
+                            historical_scores[comm][cand_name] = 0.5 * historical_scores[comm][cand_name] + 0.5 * val_sse
+                        else:
+                            historical_scores[comm][cand_name] = val_sse
 
     # Weighted summary
     weights = [r["weight"] for r in split_results]
